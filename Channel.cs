@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace rocket_bot
 {
     public class Channel<T> where T : class
     {
+        List<T> result = new List<T>();
+
         /// <summary>
         /// Возвращает элемент по индексу или null, если такого элемента нет.
         /// При присвоении удаляет все элементы после.
@@ -15,11 +19,23 @@ namespace rocket_bot
         {
             get
             {
-
-                return null;
+                lock (result)
+                {
+                    var item = (index != Count) ? result[index] : null;
+                    return item;
+                }
             }
             set
             {
+                lock (result)
+                {
+                    if (index < Count)
+                    {
+                        result = result.Take(index).ToList();
+                        result.Add(value);
+                    }
+                    else result.Add(value);
+                }
             }
         }
 
@@ -28,15 +44,33 @@ namespace rocket_bot
         /// </summary>
         public T LastItem()
         {
-            return null;
+            lock (result)
+            {
+                var item = (Count > 0) ? result[Count - 1] : null;
+                return item;
+            }
         }
 
         /// <summary>
         /// Добавляет item в конец только если lastItem является последним элементом
         /// </summary>
+
         public void AppendIfLastItemIsUnchanged(T item, T knownLastItem)
         {
+            lock (result)
+            {
+                if (LastItem() == knownLastItem) result.Add(item);
+            }
         }
+
+        //async public void AppendIfLastItemIsUnchanged(T item, T knownLastItem)
+        //{
+        //    await Task.Run(() =>
+        //    {
+        //        if (Count != 0 && result[Count - 1] == knownLastItem) result.Add(item);
+        //        else result.Add(item);
+        //    });
+        //}
 
         /// <summary>
         /// Возвращает количество элементов в коллекции
@@ -45,7 +79,7 @@ namespace rocket_bot
         {
             get
             {
-                return 0;
+                lock (result) return result.Count;
             }
         }
     }
