@@ -1,8 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using NUnit.Framework;
 
 namespace rocket_bot
 {
@@ -21,7 +17,7 @@ namespace rocket_bot
             {
                 lock (result)
                 {
-                    var item = (index != Count) ? result[index] : null;
+                    var item = (index < Count) ? result[index] : null;
                     return item;
                 }
             }
@@ -29,12 +25,12 @@ namespace rocket_bot
             {
                 lock (result)
                 {
-                    if (index < Count)
+                    if (index == Count) result.Add(value);
+                    else
                     {
-                        result = result.Take(index).ToList();
+                        result.RemoveRange(index, Count - index);
                         result.Add(value);
                     }
-                    else result.Add(value);
                 }
             }
         }
@@ -54,23 +50,11 @@ namespace rocket_bot
         /// <summary>
         /// Добавляет item в конец только если lastItem является последним элементом
         /// </summary>
-
         public void AppendIfLastItemIsUnchanged(T item, T knownLastItem)
         {
             lock (result)
-            {
                 if (LastItem() == knownLastItem) result.Add(item);
-            }
         }
-
-        //async public void AppendIfLastItemIsUnchanged(T item, T knownLastItem)
-        //{
-        //    await Task.Run(() =>
-        //    {
-        //        if (Count != 0 && result[Count - 1] == knownLastItem) result.Add(item);
-        //        else result.Add(item);
-        //    });
-        //}
 
         /// <summary>
         /// Возвращает количество элементов в коллекции
