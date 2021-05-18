@@ -15,8 +15,6 @@ namespace rocket_bot
                     SearchBestMove(rocket, new Random(random.Next()), iterationsCount / 2));                
                 var task2 = Task.Factory.StartNew(() => 
                     SearchBestMove(rocket, new Random(random.Next()), iterationsCount / 2));
-                var one = task1.Result.Item2;
-                var two = task2.Result.Item2;
                 return (task1.Result.Item2 > task2.Result.Item2) ?
                     rocket.Move(task1.Result.Item1, level) : rocket.Move(task2.Result.Item1, level);
             }
